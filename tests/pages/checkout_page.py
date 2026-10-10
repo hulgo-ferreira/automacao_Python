@@ -1,4 +1,6 @@
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 from .base_page import BasePage
 
@@ -11,6 +13,9 @@ class CheckoutPage(BasePage):
     CONTINUE = (By.ID, "continue")
     FINISH = (By.ID, "finish")
     SUCCESS_MSG = (By.CLASS_NAME, "complete-header")
+    SUCCESS_IMAGE = (By.CSS_SELECTOR, ".pony_express")
+    ERROR_MSG = (By.CSS_SELECTOR, "h3[data-test='error']")
+    SUBTOTAL = (By.CLASS_NAME, "summary_subtotal_label")
 
     def fill_form(self, name, last, zip_code):
         self.type(*self.FIRST_NAME, name)
@@ -25,3 +30,15 @@ class CheckoutPage(BasePage):
 
     def get_success_message(self):
         return self.get_text(*self.SUCCESS_MSG)
+
+    def success_image_is_displayed(self):
+        WebDriverWait(self.driver, self.TIMEOUT).until(
+            EC.visibility_of_element_located(self.SUCCESS_IMAGE)
+        )
+        return self.driver.find_element(*self.SUCCESS_IMAGE).is_displayed()
+
+    def get_error_message(self):
+        return self.get_text(*self.ERROR_MSG)
+
+    def get_subtotal(self):
+        return float(self.get_text(*self.SUBTOTAL).split("$")[1])
